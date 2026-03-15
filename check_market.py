@@ -141,14 +141,14 @@ def main():
     hist = get_sp500_history()
     last_trading_day = hist.index[-1].date()
 
-    skip_market_check = os.environ.get("SKIP_MARKET_CHECK", "").lower() == "true"
-    if not skip_market_check and last_trading_day != et_today:
+    force_email = os.environ.get("FORCE_EMAIL", "").lower() == "true"
+    if not force_email and last_trading_day != et_today:
         print(f"Market closed today ({et_today}). Last trading day: {last_trading_day}. Skipping.")
         sys.exit(0)
 
     alerts, today_close, today_date = check_thresholds(hist)
 
-    if not alerts:
+    if not alerts and not force_email:
         print(f"No thresholds breached. S&P 500 closed at {today_close:,.2f} on {today_date}.")
         return
 

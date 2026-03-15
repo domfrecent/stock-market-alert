@@ -6,8 +6,8 @@ on:
     - cron: "30 21 * * 1-5"
   workflow_dispatch:
     inputs:
-      skip_market_check:
-        description: "Skip the market-open check (for testing on weekends/holidays)"
+      force_email:
+        description: "Send email regardless of whether thresholds were breached"
         type: boolean
         default: false
 
@@ -30,5 +30,5 @@ jobs:
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          SKIP_MARKET_CHECK: ${{ inputs.skip_market_check }}
+          FORCE_EMAIL: ${{ inputs.force_email }}
         run: python check_market.py
