@@ -10,10 +10,10 @@ import pandas as pd
 import yfinance as yf
 
 THRESHOLDS = [
-    ("Daily",     2,  -2),
-    ("Weekly",    7,  -5),
-    ("Monthly",  30, -10),
-    ("Quarterly", 90, -20),
+    ("Daily",     2,  99),
+    ("Weekly",    7,  99),
+    ("Monthly",  30,  99),
+    ("Quarterly", 90, 99),
 ]
 
 
