@@ -75,11 +75,11 @@ def build_email_html(alerts, today_close, today_date):
     for a in alerts:
         rows += f"""
         <tr>
-          <td>{a['label']}</td>
-          <td style="color:#c0392b;font-weight:bold">{a['change']:+.2f}%</td>
-          <td>{a['threshold']}%</td>
-          <td>{a['ref_date']}</td>
-          <td>{a['ref_close']:,.2f}</td>
+          <td style="padding:8px 12px">{a['label']}</td>
+          <td style="padding:8px 12px;text-align:right;color:#c0392b;font-weight:bold">{a['change']:+.2f}%</td>
+          <td style="padding:8px 12px;text-align:right">{a['threshold']}%</td>
+          <td style="padding:8px 12px">{a['ref_date']}</td>
+          <td style="padding:8px 12px;text-align:right">{a['ref_close']:,.2f}</td>
         </tr>"""
 
     return f"""
@@ -102,10 +102,10 @@ def build_email_html(alerts, today_close, today_date):
         <thead>
           <tr style="background:#f2f2f2;text-align:left">
             <th style="padding:8px 12px">Period</th>
-            <th style="padding:8px 12px">Change</th>
-            <th style="padding:8px 12px">Threshold</th>
+            <th style="padding:8px 12px;text-align:right">Change</th>
+            <th style="padding:8px 12px;text-align:right">Threshold</th>
             <th style="padding:8px 12px">Peak Date</th>
-            <th style="padding:8px 12px">Peak Close</th>
+            <th style="padding:8px 12px;text-align:right">Peak Close</th>
           </tr>
         </thead>
         <tbody>{rows}
