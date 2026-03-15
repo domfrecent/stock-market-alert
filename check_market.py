@@ -45,6 +45,7 @@ def check_thresholds(hist):
     today_close = hist["Close"].iloc[-1]
     today_date = hist.index[-1].date()
 
+    rows = []
     alerts = []
     for label, n_days, threshold in THRESHOLDS:
         if label == "Daily":
@@ -58,28 +59,38 @@ def check_thresholds(hist):
                 continue
 
         change = pct_change(today_close, ref_close)
-        if change <= threshold:
-            alerts.append({
-                "label": label,
-                "change": change,
-                "threshold": threshold,
-                "ref_close": ref_close,
-                "ref_date": ref_date,
-            })
+        breached = change <= threshold
+        row = {
+            "label": label,
+            "change": change,
+            "threshold": threshold,
+            "ref_close": ref_close,
+            "ref_date": ref_date,
+            "breached": breached,
+        }
+        rows.append(row)
+        if breached:
+            alerts.append(row)
 
-    return alerts, today_close, today_date
+    return rows, alerts, today_close, today_date
 
 
-def build_email_html(alerts, today_close, today_date):
-    rows = ""
-    for a in alerts:
-        rows += f"""
-        <tr>
-          <td style="padding:8px 12px">{a['label']}</td>
-          <td style="padding:8px 12px;text-align:right;color:#c0392b;font-weight:bold">{a['change']:+.2f}%</td>
-          <td style="padding:8px 12px;text-align:right">{a['threshold']}%</td>
-          <td style="padding:8px 12px">{a['ref_date']}</td>
-          <td style="padding:8px 12px;text-align:right">{a['ref_close']:,.2f}</td>
+def build_email_html(rows, today_close, today_date):
+    table_rows = ""
+    for r in rows:
+        if r["breached"]:
+            row_style = "background:#fff5f5"
+            change_style = "padding:8px 12px;text-align:right;color:#c0392b;font-weight:bold"
+        else:
+            row_style = ""
+            change_style = "padding:8px 12px;text-align:right"
+        table_rows += f"""
+        <tr style="{row_style}">
+          <td style="padding:8px 12px">{r['label']}</td>
+          <td style="{change_style}">{r['change']:+.2f}%</td>
+          <td style="padding:8px 12px;text-align:right">{r['threshold']}%</td>
+          <td style="padding:8px 12px">{r['ref_date']}</td>
+          <td style="padding:8px 12px;text-align:right">{r['ref_close']:,.2f}</td>
         </tr>"""
 
     return f"""
@@ -97,7 +108,7 @@ def build_email_html(alerts, today_close, today_date):
           <td><strong>{today_close:,.2f}</strong></td>
         </tr>
       </table>
-      <h3 style="margin-bottom:8px">Thresholds Breached</h3>
+      <h3 style="margin-bottom:8px">S&amp;P 500 Performance</h3>
       <table style="border-collapse:collapse;width:100%">
         <thead>
           <tr style="background:#f2f2f2;text-align:left">
@@ -108,25 +119,24 @@ def build_email_html(alerts, today_close, today_date):
             <th style="padding:8px 12px;text-align:right">Peak Close</th>
           </tr>
         </thead>
-        <tbody>{rows}
+        <tbody>{table_rows}
         </tbody>
       </table>
     </body></html>"""
 
 
-def send_email(alerts, today_close, today_date):
+def send_email(rows, alerts, today_close, today_date):
     sender = os.environ["GMAIL_USER"]
     recipient = sender
     app_password = os.environ["GMAIL_APP_PASSWORD"]
 
-    triggered = ", ".join(a["label"] for a in alerts)
     subject = f"Notable Decline in the S&P 500 [{today_date}]"
 
     msg = MIMEMultipart("alternative")
     msg["From"] = sender
     msg["To"] = recipient
     msg["Subject"] = subject
-    msg.attach(MIMEText(build_email_html(alerts, today_close, today_date), "html"))
+    msg.attach(MIMEText(build_email_html(rows, today_close, today_date), "html"))
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(sender, app_password)
@@ -146,13 +156,13 @@ def main():
         print(f"Market closed today ({et_today}). Last trading day: {last_trading_day}. Skipping.")
         sys.exit(0)
 
-    alerts, today_close, today_date = check_thresholds(hist)
+    rows, alerts, today_close, today_date = check_thresholds(hist)
 
     if not alerts and not force_email:
         print(f"No thresholds breached. S&P 500 closed at {today_close:,.2f} on {today_date}.")
         return
 
-    send_email(alerts, today_close, today_date)
+    send_email(rows, alerts, today_close, today_date)
 
 
 if __name__ == "__main__":
