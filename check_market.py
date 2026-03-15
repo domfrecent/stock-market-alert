@@ -113,7 +113,8 @@ def main():
     hist = get_sp500_history()
     last_trading_day = hist.index[-1].date()
 
-    if last_trading_day != et_today:
+    skip_market_check = os.environ.get("SKIP_MARKET_CHECK", "").lower() == "true"
+    if not skip_market_check and last_trading_day != et_today:
         print(f"Market closed today ({et_today}). Last trading day: {last_trading_day}. Skipping.")
         sys.exit(0)
 
