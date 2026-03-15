@@ -77,55 +77,99 @@ def check_thresholds(hist):
 
 def build_email_html(rows, today_close, today_date):
     table_rows = ""
-    for r in rows:
+    for i, r in enumerate(rows):
+        row_bg = "#FFF8F8" if r["breached"] else ("#FFFFFF" if i % 2 == 0 else "#FAFAFA")
         if r["breached"]:
-            row_style = "background:#fff5f5"
-            change_style = "padding:8px 12px;text-align:right;color:#c0392b;font-weight:bold"
+            change_color = "#C5221F"
+            change_weight = "bold"
         elif r["change"] < 0:
-            row_style = ""
-            change_style = "padding:8px 12px;text-align:right;color:#c0392b"
+            change_color = "#C5221F"
+            change_weight = "normal"
         else:
-            row_style = ""
-            change_style = "padding:8px 12px;text-align:right"
+            change_color = "#137333"
+            change_weight = "normal"
+
+        alert_badge = (
+            '<span style="display:inline-block;background:#FDECEA;color:#C5221F;'
+            'font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;'
+            'margin-left:8px;vertical-align:middle">ALERT</span>'
+            if r["breached"] else ""
+        )
+
         table_rows += f"""
-        <tr style="{row_style}">
-          <td style="padding:8px 12px">{r['label']}</td>
-          <td style="{change_style}">{r['change']:+.2f}%</td>
-          <td style="padding:8px 12px;text-align:right">{r['threshold']}%</td>
-          <td style="padding:8px 12px">{r['ref_date']}</td>
-          <td style="padding:8px 12px;text-align:right">{r['ref_close']:,.2f}</td>
+        <tr style="background:{row_bg};border-bottom:1px solid #EEEEEE">
+          <td style="padding:12px 16px;color:#202124;font-size:14px">{r['label']}{alert_badge}</td>
+          <td style="padding:12px 16px;text-align:right;color:{change_color};font-weight:{change_weight};font-size:14px">{r['change']:+.2f}%</td>
+          <td style="padding:12px 16px;text-align:right;color:#5F6368;font-size:14px">{r['threshold']}%</td>
+          <td style="padding:12px 16px;color:#5F6368;font-size:14px">{r['ref_date']}</td>
+          <td style="padding:12px 16px;text-align:right;color:#202124;font-size:14px">{r['ref_close']:,.2f}</td>
         </tr>"""
 
     return f"""
-    <html><body style="font-family:sans-serif;color:#222;max-width:600px;margin:40px auto">
-      <h2 style="border-bottom:2px solid #c0392b;padding-bottom:8px">
-        S&amp;P 500 Market Alert
-      </h2>
-      <table style="border-collapse:collapse;margin-bottom:24px">
-        <tr>
-          <td style="color:#666;padding-right:16px">Date</td>
-          <td><strong>{today_date}</strong></td>
-        </tr>
-        <tr>
-          <td style="color:#666;padding-right:16px">Close</td>
-          <td><strong>{today_close:,.2f}</strong></td>
-        </tr>
+    <html>
+    <body style="margin:0;padding:0;background:#F1F3F4;font-family:'Google Sans',Roboto,Arial,sans-serif">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F3F4;padding:40px 16px">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:8px;overflow:hidden;border:1px solid #DADCE0">
+
+            <!-- Header -->
+            <tr>
+              <td style="background:#1A73E8;padding:24px 32px">
+                <p style="margin:0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.75);letter-spacing:0.8px;text-transform:uppercase">Market Alert</p>
+                <h1 style="margin:4px 0 0;font-size:22px;font-weight:400;color:#FFFFFF">S&amp;P 500 Notable Decline</h1>
+              </td>
+            </tr>
+
+            <!-- Summary bar -->
+            <tr>
+              <td style="padding:20px 32px;border-bottom:1px solid #EEEEEE">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:40px">
+                      <p style="margin:0;font-size:11px;color:#5F6368;letter-spacing:0.4px;text-transform:uppercase">Date</p>
+                      <p style="margin:4px 0 0;font-size:16px;font-weight:500;color:#202124">{today_date}</p>
+                    </td>
+                    <td>
+                      <p style="margin:0;font-size:11px;color:#5F6368;letter-spacing:0.4px;text-transform:uppercase">S&amp;P 500 Close</p>
+                      <p style="margin:4px 0 0;font-size:16px;font-weight:500;color:#202124">{today_close:,.2f}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Table -->
+            <tr>
+              <td style="padding:0">
+                <p style="margin:0;padding:16px 32px 8px;font-size:11px;font-weight:600;color:#5F6368;letter-spacing:0.8px;text-transform:uppercase">Performance by Period</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+                  <thead>
+                    <tr style="background:#F8F9FA;border-bottom:2px solid #EEEEEE">
+                      <th style="padding:10px 16px;text-align:left;font-size:12px;font-weight:600;color:#5F6368;letter-spacing:0.4px">Period</th>
+                      <th style="padding:10px 16px;text-align:right;font-size:12px;font-weight:600;color:#5F6368;letter-spacing:0.4px">Change</th>
+                      <th style="padding:10px 16px;text-align:right;font-size:12px;font-weight:600;color:#5F6368;letter-spacing:0.4px">Threshold</th>
+                      <th style="padding:10px 16px;text-align:left;font-size:12px;font-weight:600;color:#5F6368;letter-spacing:0.4px">Peak Date</th>
+                      <th style="padding:10px 16px;text-align:right;font-size:12px;font-weight:600;color:#5F6368;letter-spacing:0.4px">Peak Close</th>
+                    </tr>
+                  </thead>
+                  <tbody>{table_rows}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:16px 32px;border-top:1px solid #EEEEEE">
+                <p style="margin:0;font-size:12px;color:#9AA0A6">This is an automated alert. Data sourced from Yahoo Finance.</p>
+              </td>
+            </tr>
+
+          </table>
+        </td></tr>
       </table>
-      <h3 style="margin-bottom:8px">S&amp;P 500 Performance</h3>
-      <table style="border-collapse:collapse;width:100%">
-        <thead>
-          <tr style="background:#f2f2f2;text-align:left">
-            <th style="padding:8px 12px">Period</th>
-            <th style="padding:8px 12px;text-align:right">Change</th>
-            <th style="padding:8px 12px;text-align:right">Threshold</th>
-            <th style="padding:8px 12px">Peak Date</th>
-            <th style="padding:8px 12px;text-align:right">Peak Close</th>
-          </tr>
-        </thead>
-        <tbody>{table_rows}
-        </tbody>
-      </table>
-    </body></html>"""
+    </body>
+    </html>"""
 
 
 def send_email(rows, alerts, today_close, today_date):
