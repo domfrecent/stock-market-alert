@@ -142,7 +142,7 @@ def send_email(rows, alerts, today_close, today_date):
         server.login(sender, app_password)
         server.sendmail(sender, recipient, msg.as_string())
 
-    print(f"Alert sent to {recipient}: {triggered}")
+    print(f"Alert sent to {recipient}")
 
 
 def main():
