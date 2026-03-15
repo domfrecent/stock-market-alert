@@ -72,7 +72,7 @@ def check_thresholds(hist):
 
 def send_email(alerts, today_close, today_date):
     sender = os.environ["GMAIL_USER"]
-    recipient = os.environ["ALERT_EMAIL"]
+    recipient = sender
     app_password = os.environ["GMAIL_APP_PASSWORD"]
 
     triggered = ", ".join(a["label"] for a in alerts)

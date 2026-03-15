@@ -1,0 +1,28 @@
+name: S&P 500 Market Alert
+
+on:
+  schedule:
+    # 9:30 PM UTC = 4:30 PM EST / 5:30 PM EDT — after NYSE close
+    - cron: "30 21 * * 1-5"
+  workflow_dispatch: # allows manual trigger from GitHub UI (useful for testing)
+
+jobs:
+  check-market:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run market check
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python check_market.py
