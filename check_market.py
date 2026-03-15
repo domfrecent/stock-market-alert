@@ -161,7 +161,7 @@ def build_email_html(rows, today_close, today_date):
             <!-- Footer -->
             <tr>
               <td style="padding:16px 32px;border-top:1px solid #EEEEEE">
-                <p style="margin:0;font-size:12px;color:#9AA0A6">This is an automated alert. Data sourced from Yahoo Finance.</p>
+                <p style="margin:0;font-size:12px;color:#9AA0A6">This is an automated alert. Data sourced from Yahoo Finance. &nbsp;·&nbsp; <a href="https://finance.yahoo.com/quote/%5EGSPC/" style="color:#1A73E8;text-decoration:none">View S&amp;P 500 ↗</a></p>
               </td>
             </tr>
 
