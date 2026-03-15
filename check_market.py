@@ -10,10 +10,10 @@ import pandas as pd
 import yfinance as yf
 
 THRESHOLDS = [
-    ("Daily",     2,  99),
-    ("Weekly",    7,  99),
-    ("Monthly",  30,  99),
-    ("Quarterly", 90, 99),
+    ("Daily",     2,  -2),
+    ("Weekly",    7,  -5),
+    ("Monthly",  30, -10),
+    ("Quarterly", 90, -15),
 ]
 
 
@@ -120,7 +120,7 @@ def send_email(alerts, today_close, today_date):
     app_password = os.environ["GMAIL_APP_PASSWORD"]
 
     triggered = ", ".join(a["label"] for a in alerts)
-    subject = f"Notable Decline in the S&P 500 — {today_date}"
+    subject = f"Notable Decline in the S&P 500 [{today_date}]"
 
     msg = MIMEMultipart("alternative")
     msg["From"] = sender
