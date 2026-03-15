@@ -4,7 +4,12 @@ on:
   schedule:
     # 9:30 PM UTC = 4:30 PM EST / 5:30 PM EDT — after NYSE close
     - cron: "30 21 * * 1-5"
-  workflow_dispatch: # allows manual trigger from GitHub UI (useful for testing)
+  workflow_dispatch:
+    inputs:
+      skip_market_check:
+        description: "Skip the market-open check (for testing on weekends/holidays)"
+        type: boolean
+        default: false
 
 jobs:
   check-market:
@@ -25,4 +30,5 @@ jobs:
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          SKIP_MARKET_CHECK: ${{ inputs.skip_market_check }}
         run: python check_market.py
