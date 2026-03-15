@@ -70,35 +70,63 @@ def check_thresholds(hist):
     return alerts, today_close, today_date
 
 
+def build_email_html(alerts, today_close, today_date):
+    rows = ""
+    for a in alerts:
+        rows += f"""
+        <tr>
+          <td>{a['label']}</td>
+          <td style="color:#c0392b;font-weight:bold">{a['change']:+.2f}%</td>
+          <td>{a['threshold']}%</td>
+          <td>{a['ref_date']}</td>
+          <td>{a['ref_close']:,.2f}</td>
+        </tr>"""
+
+    return f"""
+    <html><body style="font-family:sans-serif;color:#222;max-width:600px;margin:40px auto">
+      <h2 style="border-bottom:2px solid #c0392b;padding-bottom:8px">
+        S&amp;P 500 Market Alert
+      </h2>
+      <table style="border-collapse:collapse;margin-bottom:24px">
+        <tr>
+          <td style="color:#666;padding-right:16px">Date</td>
+          <td><strong>{today_date}</strong></td>
+        </tr>
+        <tr>
+          <td style="color:#666;padding-right:16px">Close</td>
+          <td><strong>{today_close:,.2f}</strong></td>
+        </tr>
+      </table>
+      <h3 style="margin-bottom:8px">Thresholds Breached</h3>
+      <table style="border-collapse:collapse;width:100%">
+        <thead>
+          <tr style="background:#f2f2f2;text-align:left">
+            <th style="padding:8px 12px">Period</th>
+            <th style="padding:8px 12px">Change</th>
+            <th style="padding:8px 12px">Threshold</th>
+            <th style="padding:8px 12px">Peak Date</th>
+            <th style="padding:8px 12px">Peak Close</th>
+          </tr>
+        </thead>
+        <tbody>{rows}
+        </tbody>
+      </table>
+    </body></html>"""
+
+
 def send_email(alerts, today_close, today_date):
     sender = os.environ["GMAIL_USER"]
     recipient = sender
     app_password = os.environ["GMAIL_APP_PASSWORD"]
 
     triggered = ", ".join(a["label"] for a in alerts)
-    subject = f"S&P 500 Alert ({triggered}) — {today_date}"
+    subject = f"Notable Decline in the S&P 500 — {today_date}"
 
-    lines = [
-        f"S&P 500 Market Alert",
-        f"{'=' * 40}",
-        f"Date:        {today_date}",
-        f"Close:       {today_close:,.2f}",
-        f"",
-        f"Thresholds breached:",
-        f"",
-    ]
-    for a in alerts:
-        lines.append(
-            f"  {a['label']:10s}  {a['change']:+.2f}%  "
-            f"(threshold: {a['threshold']}%,  peak date: {a['ref_date']},  peak close: {a['ref_close']:,.2f})"
-        )
-
-    body = "\n".join(lines)
-    msg = MIMEMultipart()
+    msg = MIMEMultipart("alternative")
     msg["From"] = sender
     msg["To"] = recipient
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    msg.attach(MIMEText(build_email_html(alerts, today_close, today_date), "html"))
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(sender, app_password)
