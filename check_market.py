@@ -81,6 +81,9 @@ def build_email_html(rows, today_close, today_date):
         if r["breached"]:
             row_style = "background:#fff5f5"
             change_style = "padding:8px 12px;text-align:right;color:#c0392b;font-weight:bold"
+        elif r["change"] < 0:
+            row_style = ""
+            change_style = "padding:8px 12px;text-align:right;color:#c0392b"
         else:
             row_style = ""
             change_style = "padding:8px 12px;text-align:right"
