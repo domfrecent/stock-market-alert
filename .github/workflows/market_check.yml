@@ -2,7 +2,7 @@ name: S&P 500 Market Alert
 
 on:
   schedule:
-    # 9:30 PM UTC = 4:30 PM EST / 5:30 PM EDT — after NYSE close
+    # 9:30 PM UTC = 5:30 PM EDT / 4:30 PM EST — after NYSE close
     - cron: "30 21 * * 1-5"
   workflow_dispatch:
     inputs:
